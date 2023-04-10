@@ -3,6 +3,8 @@
 #ifndef ACCELEROMETER_H_
 #define ACCELEROMETER_H_
 
+#include "sharedDataStruct.h"
+
 #define ACCELEROMETER_BUS_NUMBER 1
 #define ACCELEROMETER_DEVICE_ADDRESS 0x1C
 #define ACCELEROMETER_CTRL_REG_1_ADDRESS 0x2A
@@ -14,9 +16,14 @@
 #define ACCELEROMETER_OUT_Y_MSB_ADDRESS 0x03
 #define ACCELEROMETER_OUT_Y_LSB_ADDRESS 0x04
 
+#define ACCELEROMETER_MAX 16400
+
+#define ACCELEROMETER_TARGET_DELTA 0.1
+
 #define ACCELEROMETER_NUM_BYTES 7
 
-void Accelerometer_init(void);
+
+void Accelerometer_init(volatile sharedMemStruct_t* pSharedDataArg);
 void Accelerometer_waitForShutdown(void);
 
 #endif

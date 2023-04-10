@@ -8,6 +8,7 @@
 #include "sharedDataStruct.h"
 #include "colours.h"
 #include "accelerometer.h"
+#include "log.h"
 
 // General PRU Memory Sharing Routine
 // ----------------------------------
@@ -61,17 +62,19 @@ void setAllPixels(volatile uint32_t pixels[], uint32_t colour) {
 int main(void) {
     printf("Hello world!\n");
 
+    initLogLevel();
+
     // Get access to shared memory for my uses.
     volatile void* pPruBase = getPruMmapAddr();
     volatile sharedMemStruct_t* pSharedPru0 = PRU0_MEM_FROM_BASE(pPruBase);
 
-    Accelerometer_init();
+    Accelerometer_init(pSharedPru0);
 
     // setAllPixels(pSharedPru0->Linux_pixels, YELLOW);
     // sleep(5);
     // setAllPixels(pSharedPru0->Linux_pixels, RED);
     // sleep(5);
-    setAllPixels(pSharedPru0->Linux_pixels, OFF);
+    // setAllPixels(pSharedPru0->Linux_pixels, OFF);
 
     Accelerometer_waitForShutdown();
 
