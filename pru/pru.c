@@ -66,6 +66,16 @@ void setPixels(volatile uint32_t pixels[]) {
     __delay_cycles(resetCycles);
 }
 
+// TODO:
+void set14Seg(uint32_t n) {
+
+}
+
+// TODO:
+void readJoystick(void) {
+    // Set joystickDown and joystickUp in the sharedMemory appropriately.
+}
+
 void main(void) {
     // Zero everything out to begin with.
     memset((void*) pSharedMem->Linux_pixels, 0, sizeof(pSharedMem->Linux_pixels[0]));
@@ -75,5 +85,7 @@ void main(void) {
 
     while (true) {
         setPixels(pSharedMem->Linux_pixels);
+        set14Seg(pSharedMem->Linux_14SegNum);
+        readJoystick();
     }
 }
