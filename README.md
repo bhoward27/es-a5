@@ -1,6 +1,7 @@
 Run `make` and follow the steps it outlines.
 
 Make sure also to run the following once after the BBG's bootup:
+`config-pin p8.11 pruout`
 `config-pin p8.12 pruout`
 `config-pin p8.15 pruin`
 

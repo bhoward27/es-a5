@@ -48,6 +48,20 @@ static uint32 processX(float x) {
     }
 }
 
+static int32 dim(uint32 colour) {
+    switch (colour) {
+        case GREEN:
+            return DIM_GREEN;
+        case RED:
+            return DIM_RED;
+        case BLUE:
+            return DIM_BLUE;
+        default:
+            LOG(LOG_LEVEL_WARN, "Dim colour %x not implemented.\n", colour);
+            return OFF;
+    }
+}
+
 static void processY(float y, uint32 colour) {
     float minOnTarget = targetY - ACCELEROMETER_TARGET_DELTA;
     float maxOnTarget = targetY + ACCELEROMETER_TARGET_DELTA;
@@ -55,21 +69,36 @@ static void processY(float y, uint32 colour) {
         setAllPixels(pSharedPru0->Linux_pixels, colour);
     }
     else {
-        uint8 index = 0; // Between 0 and 7.
+        int centreIndex = 0; // Between 0 and (NUM_PIXELS - 1).
+        float a = (NUM_PIXELS / 2 - 1) * 1.8;
         if (y < targetY) {
-            index = round(3 - ((targetY - y) * 3));
-            index = (index > 7) ? 7 : index;
+            centreIndex = round((NUM_PIXELS / 2 - 1) - ((targetY - y) * a));
         }
         else if (y > targetY) {
-            index = round((y - targetY) * 3 + 4);
-            index = (index > 7) ? 7 : index;
+            centreIndex = round((y - targetY) * a + NUM_PIXELS / 2);
+        }
+        int topIndex = centreIndex + 1;
+        int bottomIndex = centreIndex - 1;
+        if (centreIndex > NUM_PIXELS - 1) {
+            centreIndex = NUM_PIXELS - 1;
+            bottomIndex = -1; // Don't show bottom pixel.
+        }
+        else if (centreIndex < 0) {
+            centreIndex = 0;
+            topIndex = NUM_PIXELS; // Don't show top pixel.
         }
 
         // Turn all pixels off.
         memset((void*) pSharedPru0->Linux_pixels, 0, sizeof(pSharedPru0->Linux_pixels));
 
-        // Turn desired pixel on.
-        pSharedPru0->Linux_pixels[index] = colour;
+        // Turn desired pixels on.
+        if (topIndex < NUM_PIXELS) {
+            pSharedPru0->Linux_pixels[topIndex] = dim(colour);
+        }
+        pSharedPru0->Linux_pixels[centreIndex] = colour;
+        if (bottomIndex >= 0) {
+            pSharedPru0->Linux_pixels[bottomIndex] = dim(colour);
+        }
     }
 }
 

@@ -16,6 +16,10 @@
 #define PURPLE             0x000f0f00
 #define TEAL               0x0f000f00
 
+#define DIM_GREEN          0x02000000
+#define DIM_RED            0x00020000
+#define DIM_BLUE           0x00000200
+
 #define BRIGHT_GREEN       0xff000000
 #define BRIGHT_RED         0x00ff0000
 #define BRIGHT_BLUE        0x0000ff00
