@@ -13,11 +13,18 @@ Fields in the struct must be aligned to match ARM's alignment
 Add padding fields (char _p1) to pad out to alignment.
 */
 
-// My Shared Memory Structure
-// ---------------------------
+#define NUM_PIXELS 8
+
+// Explanation of struct member prefixes:
+//  - Linux_ means that only the Linux application writes to this member.
+//  - Pru_ means that only the PRU writes to this member.
 typedef struct {
-    bool isLedOn;
-    bool isButtonPressed;
+    uint32_t Linux_pixels[NUM_PIXELS];
+    uint32_t Linux_14SegNum; // The number to display on 14-seg -- may be two digits long!
+
+    // Ideally this would be a bool, but setting to uint32 means I don't have to worry about padding.
+    uint32_t Pru_joystickDown;
+    uint32_t Pru_joystickRight;
 } sharedMemStruct_t;
 
 #endif

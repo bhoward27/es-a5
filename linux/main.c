@@ -6,6 +6,7 @@
 #include <sys/mman.h>
 
 #include "sharedDataStruct.h"
+#include "colours.h"
 
 // General PRU Memory Sharing Routine
 // ----------------------------------
@@ -50,26 +51,24 @@ void freePruMmapAddr(volatile void* pPruBase) {
     }
 }
 
+void setAllPixels(volatile uint32_t pixels[], uint32_t colour) {
+    for (int i = 0; i < NUM_PIXELS; i++) {
+        pixels[i] = colour;
+    }
+}
+
 int main(void) {
-    printf("Sharing memory with PRU\n");
-    printf(" LED should toggle each second\n");
-    printf(" Press the button to see its state here.\n");
+    printf("Hello world!\n");
 
     // Get access to shared memory for my uses.
     volatile void* pPruBase = getPruMmapAddr();
     volatile sharedMemStruct_t* pSharedPru0 = PRU0_MEM_FROM_BASE(pPruBase);
 
-    // Drive it.
-    for (int i = 0; i < 20; i++) {
-        // Drive LED
-        pSharedPru0->isLedOn = (i % 2 == 0);
-
-        // Print button
-        printf("Button: %d\n", pSharedPru0->isButtonPressed);
-
-        // Timing
-        sleep(1);
-    }
+    setAllPixels(pSharedPru0->Linux_pixels, YELLOW);
+    sleep(5);
+    setAllPixels(pSharedPru0->Linux_pixels, RED);
+    sleep(5);
+    setAllPixels(pSharedPru0->Linux_pixels, OFF);
 
     // Cleanup
     freePruMmapAddr(pPruBase);
