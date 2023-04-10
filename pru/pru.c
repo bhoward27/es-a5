@@ -78,7 +78,7 @@ void readJoystick(void) {
 
 void main(void) {
     // Zero everything out to begin with.
-    memset((void*) pSharedMem->Linux_pixels, 0, sizeof(pSharedMem->Linux_pixels[0]));
+    memset((void*) pSharedMem->Linux_pixels, 0, sizeof(pSharedMem->Linux_pixels));
     pSharedMem->Linux_14SegNum = 0;
     pSharedMem->Pru_joystickDown = 0;
     pSharedMem->Pru_joystickRight = 0;

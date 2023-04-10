@@ -1,5 +1,7 @@
 #include <pthread.h>
 #include <stdio.h>
+#include <math.h>
+#include <string.h>
 
 #include "accelerometer.h"
 #include "shutdown.h"
@@ -16,8 +18,8 @@ static volatile sharedMemStruct_t* pSharedPru0 = NULL;
 
 
 // TODO: Probably move these elsewhere.
-static float targetX;
-static float targetY;
+static float targetX = 0.2;
+static float targetY = 0.1;
 
 static void setAllPixels(volatile uint32_t pixels[], uint32_t colour) {
     for (int i = 0; i < NUM_PIXELS; i++) {
@@ -25,20 +27,49 @@ static void setAllPixels(volatile uint32_t pixels[], uint32_t colour) {
     }
 }
 
-static void processX(float x) {
+static uint32 processX(float x) {
     // X axis changes the colour.
     //      Red means need to rotate to the left. Green means rotate to the right. Blue means don't move.
 
     float minOnTarget = targetX - ACCELEROMETER_TARGET_DELTA;
     float maxOnTarget = targetX + ACCELEROMETER_TARGET_DELTA;
     if (minOnTarget <= x && x <= maxOnTarget) {
-        setAllPixels(pSharedPru0->Linux_pixels, BLUE);
+        // setAllPixels(pSharedPru0->Linux_pixels, BLUE);
+        return BLUE;
     }
     else if (x < minOnTarget) {
-        setAllPixels(pSharedPru0->Linux_pixels, GREEN);
+        return GREEN;
     }
     else if (x > maxOnTarget) {
-        setAllPixels(pSharedPru0->Linux_pixels, RED);
+        return RED;
+    }
+    else { // Should be impossible
+        return OFF;
+    }
+}
+
+static void processY(float y, uint32 colour) {
+    float minOnTarget = targetY - ACCELEROMETER_TARGET_DELTA;
+    float maxOnTarget = targetY + ACCELEROMETER_TARGET_DELTA;
+    if (minOnTarget <= y && y <= maxOnTarget) {
+        setAllPixels(pSharedPru0->Linux_pixels, colour);
+    }
+    else {
+        uint8 index = 0; // Between 0 and 7.
+        if (y < targetY) {
+            index = round(3 - ((targetY - y) * 3));
+            index = (index > 7) ? 7 : index;
+        }
+        else if (y > targetY) {
+            index = round((y - targetY) * 3 + 4);
+            index = (index > 7) ? 7 : index;
+        }
+
+        // Turn all pixels off.
+        memset((void*) pSharedPru0->Linux_pixels, 0, sizeof(pSharedPru0->Linux_pixels));
+
+        // Turn desired pixel on.
+        pSharedPru0->Linux_pixels[index] = colour;
     }
 }
 
@@ -50,10 +81,6 @@ void Accelerometer_init(volatile sharedMemStruct_t* pSharedDataArg) {
 
     // Set CTRL_REG_1 to active.
     I2c_write(i2cFd, ACCELEROMETER_CTRL_REG_1_ADDRESS, ACCELEROMETER_ACTIVE);
-
-    // TODO: Remove this.
-    targetX = 0.2;
-    targetY = -0.3;
 
     int res = pthread_create(&thread, NULL, Accelerometer_run, NULL);
     if (res != 0) {
@@ -85,7 +112,8 @@ static void* Accelerometer_run(void* args) {
         //      on that means that BBG is pointing too far up, for example.
         //      All pixels illuminate if Y axis is pointing to the target.
 
-        processX(x);
+        uint32 colour = processX(x);
+        processY(y, colour);
 
         // TODO: Decrease the sleep time.
         sleepForMs(250);
