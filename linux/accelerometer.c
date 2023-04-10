@@ -9,6 +9,7 @@
 #include "log.h"
 #include "i2c.h"
 #include "colours.h"
+#include "target.h"
 
 static pthread_t thread;
 static int i2cFd;
@@ -16,10 +17,11 @@ static float x;
 static float y;
 static volatile sharedMemStruct_t* pSharedPru0 = NULL;
 
+// Local target coordinates. Need to be updated with Target_getX() and Target_getY().
+static float targetX = 0.0;
+static float targetY = 0.0;
 
-// TODO: Probably move these elsewhere.
-static float targetX = 0.2;
-static float targetY = 0.1;
+static void* Accelerometer_run(void* args);
 
 static void setAllPixels(volatile uint32_t pixels[], uint32_t colour) {
     for (int i = 0; i < NUM_PIXELS; i++) {
@@ -31,16 +33,14 @@ static uint32 processX(float x) {
     // X axis changes the colour.
     //      Red means need to rotate to the left. Green means rotate to the right. Blue means don't move.
 
-    float minOnTarget = targetX - ACCELEROMETER_TARGET_DELTA;
-    float maxOnTarget = targetX + ACCELEROMETER_TARGET_DELTA;
-    if (minOnTarget <= x && x <= maxOnTarget) {
+    if (Target_isOnTarget(x, targetX)) {
         // setAllPixels(pSharedPru0->Linux_pixels, BLUE);
         return BLUE;
     }
-    else if (x < minOnTarget) {
+    else if (x < targetX) {
         return GREEN;
     }
-    else if (x > maxOnTarget) {
+    else if (x > targetX) {
         return RED;
     }
     else { // Should be impossible
@@ -63,14 +63,16 @@ static int32 dim(uint32 colour) {
 }
 
 static void processY(float y, uint32 colour) {
-    float minOnTarget = targetY - ACCELEROMETER_TARGET_DELTA;
-    float maxOnTarget = targetY + ACCELEROMETER_TARGET_DELTA;
-    if (minOnTarget <= y && y <= maxOnTarget) {
+    // Y axis changes which pixels are illuminated.
+    //      Position of the pixel indicates where BBG is pointing relative to the target. So if an upper pixel is
+    //      on that means that BBG is pointing too far up, for example.
+    //      All pixels illuminate if Y axis is pointing to the target.
+    if (Target_isOnTarget(y, targetY)) {
         setAllPixels(pSharedPru0->Linux_pixels, colour);
     }
     else {
         int centreIndex = 0; // Between 0 and (NUM_PIXELS - 1).
-        float a = (NUM_PIXELS / 2 - 1) * 1.8;
+        float a = (NUM_PIXELS / 2 - 1) * 1.8; // The last number there is arbitrary -- determined "by feel".
         if (y < targetY) {
             centreIndex = round((NUM_PIXELS / 2 - 1) - ((targetY - y) * a));
         }
@@ -102,8 +104,6 @@ static void processY(float y, uint32 colour) {
     }
 }
 
-static void* Accelerometer_run(void* args);
-
 void Accelerometer_init(volatile sharedMemStruct_t* pSharedDataArg) {
     pSharedPru0 = pSharedDataArg;
     i2cFd = I2c_openBus(ACCELEROMETER_BUS_NUMBER, ACCELEROMETER_DEVICE_ADDRESS);
@@ -128,24 +128,19 @@ static void* Accelerometer_run(void* args) {
         x = (float) rawX / ACCELEROMETER_MAX;
         y = (float) rawY / ACCELEROMETER_MAX;
 
+        // Print current coordinates of BBG orientation.
+        // LOG(LOG_LEVEL_DEBUG, "x = %f\n", x);
+        // LOG(LOG_LEVEL_DEBUG, "y = %f\n", y);
 
-        // LOG(LOG_LEVEL_DEBUG, "Raw x = %d\n", rawX);
-        LOG(LOG_LEVEL_DEBUG, "x = %f\n", x);
-        // LOG(LOG_LEVEL_DEBUG, "Raw y = %d\n", rawY);
-        LOG(LOG_LEVEL_DEBUG, "y = %f\n", y);
+        // Update local target coordinates.
+        targetX = Target_getX();
+        targetY = Target_getY();
 
-        // X axis changes the colour.
-        //      Red means need to rotate to the left. Green means rotate to the right. Blue means don't move.
-        // Y axis changes which pixels are illuminated.
-        //      Position of the pixel indicates where BBG is pointing relative to the target. So if an upper pixel is
-        //      on that means that BBG is pointing too far up, for example.
-        //      All pixels illuminate if Y axis is pointing to the target.
-
+        // Set NeoPixel colours based on BBG orientation's proximity to target.
         uint32 colour = processX(x);
         processY(y, colour);
 
-        // TODO: Decrease the sleep time.
-        sleepForMs(250);
+        sleepForMs(50);
     }
 
     return NULL;

@@ -9,6 +9,7 @@
 #include "colours.h"
 #include "accelerometer.h"
 #include "log.h"
+#include "target.h"
 
 // General PRU Memory Sharing Routine
 // ----------------------------------
@@ -68,6 +69,7 @@ int main(void) {
     volatile void* pPruBase = getPruMmapAddr();
     volatile sharedMemStruct_t* pSharedPru0 = PRU0_MEM_FROM_BASE(pPruBase);
 
+    Target_setRandom();
     Accelerometer_init(pSharedPru0);
 
     // setAllPixels(pSharedPru0->Linux_pixels, YELLOW);
