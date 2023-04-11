@@ -52,15 +52,15 @@ static void Buzzer_writeToFile(char *fileToWrite, char *string)
 }
 
 static void playMissSound() {
-    Buzzer_writeToFile(PERIOD_FILE, "10204081");
-    Buzzer_writeToFile(DUTY_CYCLE_FILE, "5102040.5");
+    Buzzer_writeToFile(PERIOD_FILE, "10204080");
+    Buzzer_writeToFile(DUTY_CYCLE_FILE, "5102040");
     Buzzer_writeToFile(ENABLE_FILE, "1");
     sleepForMs(100);
-    Buzzer_writeToFile(PERIOD_FILE, "11453441");
-    Buzzer_writeToFile(DUTY_CYCLE_FILE, "5726720.5");
+    Buzzer_writeToFile(PERIOD_FILE, "11453440");
+    Buzzer_writeToFile(DUTY_CYCLE_FILE, "5726720");
     sleepForMs(200);
-    Buzzer_writeToFile(PERIOD_FILE, "12134449");
-    Buzzer_writeToFile(DUTY_CYCLE_FILE, "6067224.5");
+    Buzzer_writeToFile(PERIOD_FILE, "12134448");
+    Buzzer_writeToFile(DUTY_CYCLE_FILE, "6067224");
     sleepForMs(300);
     Buzzer_writeToFile(DUTY_CYCLE_FILE, "0");
     Buzzer_writeToFile(ENABLE_FILE, "0");
@@ -74,8 +74,8 @@ static void playHitSound() {
     Buzzer_writeToFile(PERIOD_FILE, "851310");
     Buzzer_writeToFile(DUTY_CYCLE_FILE, "425655");
     sleepForMs(200);
-    Buzzer_writeToFile(PERIOD_FILE, "568181");
-    Buzzer_writeToFile(DUTY_CYCLE_FILE, "284090.5");
+    Buzzer_writeToFile(PERIOD_FILE, "568180");
+    Buzzer_writeToFile(DUTY_CYCLE_FILE, "284090");
     sleepForMs(200);
     Buzzer_writeToFile(DUTY_CYCLE_FILE, "0");
     Buzzer_writeToFile(ENABLE_FILE, "0");
