@@ -3,6 +3,7 @@
 
 #include "target.h"
 #include "log.h"
+#include "buzzer.h"
 
 static float targetX = 0.0;
 static float targetY = 0.0;
@@ -49,12 +50,14 @@ bool Target_isOnTarget(float a, float targetA)
 bool Target_fire(float x, float y)
 {
     if (Target_isHit(x, y, targetX, targetY)) {
+        Buzzer_playHitSound();
         LOG(LOG_LEVEL_NOTICE, "Hit!\n");
         hits++;
         Target_setRandom();
         return true;
     }
-
+    
+    Buzzer_playMissSound();
     LOG(LOG_LEVEL_NOTICE, "Miss.\n");
     return false;
 }

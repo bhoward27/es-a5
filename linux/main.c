@@ -15,6 +15,7 @@
 #include "utils.h"
 #include "shutdown.h"
 #include "joystick.h"
+#include "buzzer.h"
 
 // General PRU Memory Sharing Routine
 // ----------------------------------
@@ -81,7 +82,9 @@ int main(void) {
     Accelerometer_init(pSharedPru0);
     DigitDisplay_init();
     Joystick_initializeJoystick(pSharedPru0);
-
+    Buzzer_initializeBuzzer();
+    
+    Buzzer_cleanupBuzzer();
     Joystick_cleanupJoystick();
     DigitDisplay_waitForShutdown();
     Accelerometer_waitForShutdown();
