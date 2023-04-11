@@ -143,6 +143,9 @@ static void* Accelerometer_run(void* args) {
         sleepForMs(50);
     }
 
+    // Turn off NeoPixel.
+    setAllPixels(pSharedPru0->Linux_pixels, OFF);
+
     return NULL;
 }
 

@@ -20,7 +20,6 @@ Add padding fields (char _p1) to pad out to alignment.
 //  - Pru_ means that only the PRU writes to this member.
 typedef struct {
     uint32_t Linux_pixels[NUM_PIXELS];
-    uint32_t Linux_14SegNum; // The number to display on 14-seg -- may be two digits long!
 
     // Ideally this would be a bool, but setting to uint32 means I don't have to worry about padding.
     uint32_t Pru_joystickDown;

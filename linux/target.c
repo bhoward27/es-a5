@@ -7,6 +7,8 @@
 static float targetX = 0.0;
 static float targetY = 0.0;
 
+static uint8 hits = 0;
+
 static float Target_rng(void)
 {
     static bool isFirstCall = true;
@@ -48,6 +50,7 @@ bool Target_fire(float x, float y)
 {
     if (Target_isHit(x, y, targetX, targetY)) {
         LOG(LOG_LEVEL_NOTICE, "Hit!\n");
+        hits++;
         Target_setRandom();
         return true;
     }
@@ -64,4 +67,9 @@ float Target_getX(void)
 float Target_getY(void)
 {
     return targetY;
+}
+
+uint8 Target_getHits(void)
+{
+    return hits;
 }

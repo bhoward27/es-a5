@@ -19,5 +19,6 @@ bool Target_isOnTarget(float a, float targetA);
 bool Target_fire(float x, float y);
 float Target_getX(void);
 float Target_getY(void);
+uint8 Target_getHits(void);
 
 #endif

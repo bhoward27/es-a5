@@ -10,6 +10,10 @@
 #include "accelerometer.h"
 #include "log.h"
 #include "target.h"
+#include "digit_display.h"
+#include "gpio.h"
+#include "utils.h"
+#include "shutdown.h"
 
 // General PRU Memory Sharing Routine
 // ----------------------------------
@@ -69,15 +73,29 @@ int main(void) {
     volatile void* pPruBase = getPruMmapAddr();
     volatile sharedMemStruct_t* pSharedPru0 = PRU0_MEM_FROM_BASE(pPruBase);
 
+    // Set up for NeoPixel.
+    Gpio_precheckSetPinMode("p8", "11", "pruout", GPIO_MAX_MODE_LEN);
+
     Target_setRandom();
     Accelerometer_init(pSharedPru0);
+    DigitDisplay_init();
 
-    // setAllPixels(pSharedPru0->Linux_pixels, YELLOW);
-    // sleep(5);
-    // setAllPixels(pSharedPru0->Linux_pixels, RED);
-    // sleep(5);
-    // setAllPixels(pSharedPru0->Linux_pixels, OFF);
+    // TODO: Remove. Just an example of using the fire() function.
+    sleepForMs(5000);
+    Target_fire(Accelerometer_getX(), Accelerometer_getY());
+    sleepForMs(5000);
+    Target_fire(Accelerometer_getX(), Accelerometer_getY());
+    sleepForMs(5000);
+    Target_fire(Accelerometer_getX(), Accelerometer_getY());
+    sleepForMs(5000);
+    Target_fire(Accelerometer_getX(), Accelerometer_getY());
+    sleepForMs(5000);
+    Target_fire(Accelerometer_getX(), Accelerometer_getY());
 
+    // TODO: Remove. Just an example of shutting down.
+    requestShutdown();
+
+    DigitDisplay_waitForShutdown();
     Accelerometer_waitForShutdown();
 
     // Cleanup
