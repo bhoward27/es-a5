@@ -7,6 +7,9 @@
 
 #include "joystick.h"
 #include "utils.h"
+#include "shutdown.h"
+#include "accelerometer.h"
+#include "target.h"
 
 #define INPUT_SLEEP_TIME 100
 #define JOYSTICK_INPUT_DEBOUNCE_TIME 50
@@ -17,8 +20,6 @@ static volatile sharedMemStruct_t* pSharedPru0 = NULL;
 // Learned how to make ms timer from this link: https://www.reddit.com/r/learnprogramming/comments/1dlxqv/comment/c9rksma/
 static clock_t downDirectionTimer;
 static clock_t rightDirectionTimer;
-
-static bool cleanupFlag = false;
 
 // The function below was provided by Dr. Brian Fraser
 static void Joystick_runCommand(char *command)
@@ -39,27 +40,27 @@ static void Joystick_runCommand(char *command)
         perror("Unable to execute command:");
         printf("  command:   %s\n", command);
         printf("  exit code: %d\n", exitCode);
-    } 
+    }
 }
 
 static void *joystickThread(void *args)
 {
-	while (true) {
+	while (!isShutdownRequested()) {
         sleepForMs(INPUT_SLEEP_TIME);
-
-        if (cleanupFlag) {
-            break;
-        }
 
         if (pSharedPru0->Pru_joystickDown == 0 && JOYSTICK_INPUT_DEBOUNCE_TIME < ((double)(clock() - downDirectionTimer) / CLOCKS_PER_SEC * 1000)) {
             printf("Down Button Pressed\n");
-            // Add logic here for fire
+
+            /* bool isHit = */Target_fire(Accelerometer_getX(), Accelerometer_getY());
+
             downDirectionTimer = clock();
         } else if (pSharedPru0->Pru_joystickRight == 0 && JOYSTICK_INPUT_DEBOUNCE_TIME < ((double)(clock() - rightDirectionTimer) / CLOCKS_PER_SEC * 1000)) {
             printf("Right Button Pressed\n");
-            // Add logic here for exit 
+
+            requestShutdown();
+
             rightDirectionTimer = clock();
-        } 
+        }
     }
     return 0;
 }
@@ -69,7 +70,7 @@ void Joystick_initializeJoystick(volatile sharedMemStruct_t* pSharedDataArg)
     pSharedPru0 = pSharedDataArg;
     Joystick_runCommand("config-pin p8.15 pruin");
     Joystick_runCommand("config-pin p8.16 pruin");
-    
+
     downDirectionTimer = clock();
     rightDirectionTimer = clock();
     pthread_create(&samplerId, NULL, &joystickThread, NULL);
@@ -77,6 +78,5 @@ void Joystick_initializeJoystick(volatile sharedMemStruct_t* pSharedDataArg)
 
 void Joystick_cleanupJoystick(void)
 {
-    cleanupFlag = true;
     pthread_join(samplerId, NULL);
 }

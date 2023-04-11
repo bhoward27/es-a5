@@ -73,7 +73,7 @@ int main(void) {
     // Get access to shared memory for my uses.
     volatile void* pPruBase = getPruMmapAddr();
     volatile sharedMemStruct_t* pSharedPru0 = PRU0_MEM_FROM_BASE(pPruBase);
-    
+
     // Set up for NeoPixel.
     Gpio_precheckSetPinMode("p8", "11", "pruout", GPIO_MAX_MODE_LEN);
 
@@ -81,22 +81,6 @@ int main(void) {
     Accelerometer_init(pSharedPru0);
     DigitDisplay_init();
     Joystick_initializeJoystick(pSharedPru0);
-
-
-    // TODO: Remove. Just an example of using the fire() function.
-    sleepForMs(5000);
-    Target_fire(Accelerometer_getX(), Accelerometer_getY());
-    sleepForMs(5000);
-    Target_fire(Accelerometer_getX(), Accelerometer_getY());
-    sleepForMs(5000);
-    Target_fire(Accelerometer_getX(), Accelerometer_getY());
-    sleepForMs(5000);
-    Target_fire(Accelerometer_getX(), Accelerometer_getY());
-    sleepForMs(5000);
-    Target_fire(Accelerometer_getX(), Accelerometer_getY());
-
-    // TODO: Remove. Just an example of shutting down.
-    requestShutdown();
 
     Joystick_cleanupJoystick();
     DigitDisplay_waitForShutdown();
