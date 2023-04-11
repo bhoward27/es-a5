@@ -14,6 +14,7 @@
 #include "gpio.h"
 #include "utils.h"
 #include "shutdown.h"
+#include "joystick.h"
 
 // General PRU Memory Sharing Routine
 // ----------------------------------
@@ -72,13 +73,15 @@ int main(void) {
     // Get access to shared memory for my uses.
     volatile void* pPruBase = getPruMmapAddr();
     volatile sharedMemStruct_t* pSharedPru0 = PRU0_MEM_FROM_BASE(pPruBase);
-
+    
     // Set up for NeoPixel.
     Gpio_precheckSetPinMode("p8", "11", "pruout", GPIO_MAX_MODE_LEN);
 
     Target_setRandom();
     Accelerometer_init(pSharedPru0);
     DigitDisplay_init();
+    Joystick_initializeJoystick(pSharedPru0);
+
 
     // TODO: Remove. Just an example of using the fire() function.
     sleepForMs(5000);
@@ -95,6 +98,7 @@ int main(void) {
     // TODO: Remove. Just an example of shutting down.
     requestShutdown();
 
+    Joystick_cleanupJoystick();
     DigitDisplay_waitForShutdown();
     Accelerometer_waitForShutdown();
 
