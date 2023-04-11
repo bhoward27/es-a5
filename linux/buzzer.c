@@ -99,6 +99,7 @@ static void *buzzerThread(void *args)
             playHitSound();
             hitSoundFlag = false;
         }
+        sleepForMs(25);
     }
     return 0;
 }
