@@ -21,6 +21,7 @@ volatile register uint32_t __R31; // input GPIO register.
 // GPIO INput; p8.15 = pru0_pru_r31_15
 //  = JSRT (Joystick Right) on Zen cape
 #define JOYSTICK_RIGHT_MASK (1 << 15)
+#define JOYSTICK_DOWN_MASK (1 << 14)
 
 // Shared Memory Configuration
 #define THIS_PRU_DRAM 0x00000 // Address of DRAM
@@ -68,7 +69,19 @@ void setPixels(volatile uint32_t pixels[]) {
 
 // TODO:
 void readJoystick(void) {
-    // Set joystickDown and joystickUp in the sharedMemory appropriately.
+    if ((__R31 & JOYSTICK_RIGHT_MASK) != 0) {
+        pSharedMem->Pru_joystickRight = 1;
+    }
+    else {
+        pSharedMem->Pru_joystickRight = 0;
+    }
+
+    if ((__R31 & JOYSTICK_DOWN_MASK) != 0) {
+        pSharedMem->Pru_joystickDown = 1;
+    }
+    else {
+        pSharedMem->Pru_joystickDown = 0;
+    }
 }
 
 void main(void) {
