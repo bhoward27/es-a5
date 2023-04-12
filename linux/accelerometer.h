@@ -25,5 +25,6 @@ void Accelerometer_init(volatile sharedMemStruct_t* pSharedDataArg);
 void Accelerometer_waitForShutdown(void);
 float Accelerometer_getX(void);
 float Accelerometer_getY(void);
+void Accelerometer_playHitAnimation(void);
 
 #endif

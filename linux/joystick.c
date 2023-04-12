@@ -51,7 +51,10 @@ static void *joystickThread(void *args)
         if (pSharedPru0->Pru_joystickDown == 0 && JOYSTICK_INPUT_DEBOUNCE_TIME < ((double)(clock() - downDirectionTimer) / CLOCKS_PER_SEC * 1000)) {
             printf("Down Button Pressed\n");
 
-            /* bool isHit = */Target_fire(Accelerometer_getX(), Accelerometer_getY());
+            bool isHit = Target_fire(Accelerometer_getX(), Accelerometer_getY());
+            if (isHit) {
+                Accelerometer_playHitAnimation();
+            }
 
             downDirectionTimer = clock();
         } else if (pSharedPru0->Pru_joystickRight == 0 && JOYSTICK_INPUT_DEBOUNCE_TIME < ((double)(clock() - rightDirectionTimer) / CLOCKS_PER_SEC * 1000)) {

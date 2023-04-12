@@ -67,7 +67,6 @@ void setPixels(volatile uint32_t pixels[]) {
     __delay_cycles(resetCycles);
 }
 
-// TODO:
 void readJoystick(void) {
     if ((__R31 & JOYSTICK_RIGHT_MASK) != 0) {
         pSharedMem->Pru_joystickRight = 1;

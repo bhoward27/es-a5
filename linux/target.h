@@ -1,12 +1,11 @@
-#ifndef TARGET_H_
-#define TARGET_H_
-
 /**
  * Provide functions related to the randomly generated target coordinates, such as:
  *      - Generating new targets
  *      - Firing at the target
  *      - Determining if a coordinate is on target
  */
+#ifndef TARGET_H_
+#define TARGET_H_
 
 #include <stdbool.h>
 #include "int_typedefs.h"

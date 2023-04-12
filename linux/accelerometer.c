@@ -21,12 +21,59 @@ static volatile sharedMemStruct_t* pSharedPru0 = NULL;
 static float targetX = 0.0;
 static float targetY = 0.0;
 
+static bool playingHitAnimation = false;
+
 static void* Accelerometer_run(void* args);
 
-static void setAllPixels(volatile uint32_t pixels[], uint32_t colour) {
+static void setAllPixels(volatile uint32_t pixels[], uint32_t colour)
+{
     for (int i = 0; i < NUM_PIXELS; i++) {
         pixels[i] = colour;
     }
+}
+
+void Accelerometer_playHitAnimation(void)
+{
+    playingHitAnimation = true;
+}
+
+static void playHitAnimation(void)
+{
+    uint32 primaryColour = BLUE;
+    uint32 secondaryColour = TEAL;
+    int64 onTime = 75;
+    float offTime = (float) onTime / 2;
+    setAllPixels(pSharedPru0->Linux_pixels, OFF);
+    sleepForMs(offTime);
+
+    setAllPixels(pSharedPru0->Linux_pixels, primaryColour);
+    sleepForMs(onTime);
+    setAllPixels(pSharedPru0->Linux_pixels, OFF);
+    sleepForMs(offTime);
+    setAllPixels(pSharedPru0->Linux_pixels, secondaryColour);
+    sleepForMs(onTime);
+    setAllPixels(pSharedPru0->Linux_pixels, OFF);
+    sleepForMs(offTime);
+
+    offTime *= 1.5;
+    setAllPixels(pSharedPru0->Linux_pixels, primaryColour);
+    sleepForMs(onTime);
+    setAllPixels(pSharedPru0->Linux_pixels, OFF);
+    sleepForMs(offTime);
+    setAllPixels(pSharedPru0->Linux_pixels, secondaryColour);
+    sleepForMs(onTime);
+    setAllPixels(pSharedPru0->Linux_pixels, OFF);
+    sleepForMs(offTime);
+
+    offTime /= 1.5;
+    setAllPixels(pSharedPru0->Linux_pixels, primaryColour);
+    sleepForMs(onTime);
+    setAllPixels(pSharedPru0->Linux_pixels, OFF);
+    sleepForMs(offTime);
+    setAllPixels(pSharedPru0->Linux_pixels, secondaryColour);
+    sleepForMs(onTime);
+    setAllPixels(pSharedPru0->Linux_pixels, OFF);
+    sleepForMs(offTime);
 }
 
 static uint32 processX(float x) {
@@ -119,28 +166,34 @@ void Accelerometer_init(volatile sharedMemStruct_t* pSharedDataArg) {
 
 static void* Accelerometer_run(void* args) {
     while (!isShutdownRequested()) {
-        uint8 buffer[ACCELEROMETER_NUM_BYTES];
-        I2c_read(i2cFd, ACCELEROMETER_STATUS_REGISTER_ADDRESS, buffer, ACCELEROMETER_NUM_BYTES);
+        if (!playingHitAnimation) {
+            uint8 buffer[ACCELEROMETER_NUM_BYTES];
+            I2c_read(i2cFd, ACCELEROMETER_STATUS_REGISTER_ADDRESS, buffer, ACCELEROMETER_NUM_BYTES);
 
-        int16 rawX = (buffer[ACCELEROMETER_OUT_X_MSB_ADDRESS] << 8) | (buffer[ACCELEROMETER_OUT_X_LSB_ADDRESS]);
-        int16 rawY = (buffer[ACCELEROMETER_OUT_Y_MSB_ADDRESS] << 8) | (buffer[ACCELEROMETER_OUT_Y_LSB_ADDRESS]);
+            int16 rawX = (buffer[ACCELEROMETER_OUT_X_MSB_ADDRESS] << 8) | (buffer[ACCELEROMETER_OUT_X_LSB_ADDRESS]);
+            int16 rawY = (buffer[ACCELEROMETER_OUT_Y_MSB_ADDRESS] << 8) | (buffer[ACCELEROMETER_OUT_Y_LSB_ADDRESS]);
 
-        x = (float) rawX / ACCELEROMETER_MAX;
-        y = (float) rawY / ACCELEROMETER_MAX;
+            x = (float) rawX / ACCELEROMETER_MAX;
+            y = (float) rawY / ACCELEROMETER_MAX;
 
-        // Print current coordinates of BBG orientation.
-        // LOG(LOG_LEVEL_DEBUG, "x = %f\n", x);
-        // LOG(LOG_LEVEL_DEBUG, "y = %f\n", y);
+            // Print current coordinates of BBG orientation.
+            // LOG(LOG_LEVEL_DEBUG, "x = %f\n", x);
+            // LOG(LOG_LEVEL_DEBUG, "y = %f\n", y);
 
-        // Update local target coordinates.
-        targetX = Target_getX();
-        targetY = Target_getY();
+            // Update local target coordinates.
+            targetX = Target_getX();
+            targetY = Target_getY();
 
-        // Set NeoPixel colours based on BBG orientation's proximity to target.
-        uint32 colour = processX(x);
-        processY(y, colour);
+            // Set NeoPixel colours based on BBG orientation's proximity to target.
+            uint32 colour = processX(x);
+            processY(y, colour);
 
-        sleepForMs(50);
+            sleepForMs(50);
+        }
+        else {
+            playHitAnimation();
+            playingHitAnimation = false;
+        }
     }
 
     // Turn off NeoPixel.

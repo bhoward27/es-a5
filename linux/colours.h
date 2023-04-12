@@ -1,9 +1,9 @@
-#ifndef COLOURS_H_
-#define COLOURS_H_
-
 /**
  * This file defines the bit patterns / waveforms for different colours on the NeoPixel.
  */
+#ifndef COLOURS_H_
+#define COLOURS_H_
+
 
 #define OFF                0x00000000
 
