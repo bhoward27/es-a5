@@ -59,9 +59,14 @@ static void playMissSound() {
     Buzzer_writeToFile(PERIOD_FILE, "11453440");
     Buzzer_writeToFile(DUTY_CYCLE_FILE, "5726720");
     sleepForMs(200);
+    Buzzer_writeToFile(PERIOD_FILE, "6179705");
+    Buzzer_writeToFile(DUTY_CYCLE_FILE, "3089852");
+    Buzzer_writeToFile(ENABLE_FILE, "1");
+    sleepForMs(100);
     Buzzer_writeToFile(PERIOD_FILE, "12134448");
     Buzzer_writeToFile(DUTY_CYCLE_FILE, "6067224");
-    sleepForMs(300);
+    sleepForMs(200);
+    Buzzer_writeToFile(DUTY_CYCLE_FILE, "0");
     Buzzer_writeToFile(ENABLE_FILE, "0");
 }
 
@@ -76,6 +81,7 @@ static void playHitSound() {
     Buzzer_writeToFile(PERIOD_FILE, "568180");
     Buzzer_writeToFile(DUTY_CYCLE_FILE, "284090");
     sleepForMs(200);
+    Buzzer_writeToFile(DUTY_CYCLE_FILE, "0");
     Buzzer_writeToFile(ENABLE_FILE, "0");
 }
 
